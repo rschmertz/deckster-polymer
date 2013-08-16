@@ -1,0 +1,18 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.deckster-deck {
+    height: 800px;
+    border: 1px solid black;
+    display: block;
+}
+
+.deckster-title {
+    background: #ddddff;
+}

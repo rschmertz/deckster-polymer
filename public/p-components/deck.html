@@ -1,0 +1,26 @@
+<polymer-element name="deckster-deck" attributes="title url">
+  <template>
+    <div class="deckster-deck">
+      <div class="deckster-title">
+	{{ title }}
+      </div>
+      <div class="deckster-cardholder">
+	{{ content }}
+      </div>
+    </div>
+  </template>
+  <script>
+    if (typeof Polymer.deck_counter == "undefined") {
+        Polymer.deck_counter = 1;
+    };
+
+    Polymer('deckster-deck', {
+        title: "Deck " + Polymer.deck_counter++,
+        content: "Content goes here",
+        ready: function () {
+            alert("Making a deck!");
+        }
+    });
+
+  </script>
+</polymer-element>
