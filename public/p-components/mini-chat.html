@@ -1,5 +1,9 @@
-<polymer-element name="mini-irc" attributes="selectedTarget newMessage">
+<polymer-element name="mini-irc" attributes="selectedTarget newMessage clientID">
   <template>
+    Set client name:
+    <input value="{{ newClientID }}">
+    <button on-click="updateClientID">Set</button>
+    <b>{{ clientID }}</b>
     <div class="message-window">
       <ul>
         <template repeat="{{ messages }}">
@@ -8,6 +12,7 @@
       </ul>
     </div>
     <select value="selectedTarget">
+      <!-- perhaps we make a custom element out of this? -->
       <option></option>
       <template repeat="{{ targets }}">
         <option value="{{ shortname }}">{{ longname }}</option>
@@ -28,18 +33,10 @@
             { content: "You have no chance to survive make your time" },
             { content: "HA HA HA HA" }
         ],
-        targets: [
-            { shortname: "42six",
-              longname: "42six solutions" },
-            { shortname: "bob",
-              longname: "Robert" },
-            { shortname: "jeb",
-              longname: "Jebediah" },
-            { shortname: "uk",
-              longname: "The United Kingdom of Great Britain blah blah" },
-            { shortname: "news",
-              longname: "news" }
-        ],
+        updateClientID: function (event) {
+            this.clientID = this.newClientID;
+        },
+        
         sendPost: function (event) {
             // The two-way data-binding isn't working now.
             console.log("sending the following message to " + this.selectedTarget);
@@ -51,7 +48,19 @@
             console.log("adding Channel " + this.newChannel);
         },
         ready: function () {
-            
+            this.targets = [
+                { shortname: "42six",
+                  longname: "42six solutions" },
+                { shortname: "bob",
+                  longname: "Robert" },
+                { shortname: "jeb",
+                  longname: "Jebediah" },
+                { shortname: "uk",
+                  longname: "The United Kingdom of Great Britain blah blah" },
+                { shortname: "news",
+                  longname: "news" }
+            ];
+
         }
         });
   </script>
