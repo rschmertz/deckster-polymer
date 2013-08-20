@@ -1,5 +1,22 @@
-<polymer-element name="mini-irc" attributes="selectedTarget newMessage">
+<polymer-element name="mini-irc" attributes="selectedTarget newMessage clientID">
   <template>
+    Set client name:
+    <input value="{{ newClientID }}">
+    <button on-click="updateClientID">Set</button>
+    <b>{{ clientID }}</b>
+    Subscribe to a channel:
+    <select value="newSubscription" id="newSubscription">
+      <option></option>
+      <template repeat="{{ targets }}">
+        <option value="{{ shortname }}">{{ longname }}</option>
+      </template>
+    </select>
+    <button on-click="addSubscription">Add</button>
+    <ul>
+      <template repeat="{{ subscriptionList }}">
+	<li>{{ name }}</li>
+      </template>
+    </ul>
     <div class="message-window">
       <ul>
         <template repeat="{{ messages }}">
@@ -8,6 +25,7 @@
       </ul>
     </div>
     <select value="selectedTarget">
+      <!-- perhaps we make a custom element out of this? -->
       <option></option>
       <template repeat="{{ targets }}">
         <option value="{{ shortname }}">{{ longname }}</option>
@@ -28,18 +46,10 @@
             { content: "You have no chance to survive make your time" },
             { content: "HA HA HA HA" }
         ],
-        targets: [
-            { shortname: "42six",
-              longname: "42six solutions" },
-            { shortname: "bob",
-              longname: "Robert" },
-            { shortname: "jeb",
-              longname: "Jebediah" },
-            { shortname: "uk",
-              longname: "The United Kingdom of Great Britain blah blah" },
-            { shortname: "news",
-              longname: "news" }
-        ],
+        updateClientID: function (event) {
+            this.clientID = this.newClientID;
+        },
+        
         sendPost: function (event) {
             // The two-way data-binding isn't working now.
             console.log("sending the following message to " + this.selectedTarget);
@@ -50,8 +60,36 @@
         addChannel: function (event) {
             console.log("adding Channel " + this.newChannel);
         },
+        addSubscription: function (event) {
+            var newSubscription = this.$.newSubscription.value;
+            if (!newSubscription) {
+                console.log("no channel selected");
+                return;
+            };
+            console.log("selected channel is " + newSubscription);
+
+            this.subscriptionSet[newSubscription] = 1;
+            var newList = [];
+            for (key in this.subscriptionSet) {
+                newList.push({name: key});
+            };
+            this.subscriptionList = newList;
+        },
         ready: function () {
-            
+            this.subscriptionList = [];
+            this.subscriptionSet = {};
+            this.targets = [
+                { shortname: "42six",
+                  longname: "42six solutions" },
+                { shortname: "bob",
+                  longname: "Robert" },
+                { shortname: "jeb",
+                  longname: "Jebediah" },
+                { shortname: "uk",
+                  longname: "The United Kingdom of Great Britain blah blah" },
+                { shortname: "news",
+                  longname: "news" }
+            ];
         }
         });
   </script>
