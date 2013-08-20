@@ -4,6 +4,19 @@
     <input value="{{ newClientID }}">
     <button on-click="updateClientID">Set</button>
     <b>{{ clientID }}</b>
+    Subscribe to a channel:
+    <select value="newSubscription" id="newSubscription">
+      <option></option>
+      <template repeat="{{ targets }}">
+        <option value="{{ shortname }}">{{ longname }}</option>
+      </template>
+    </select>
+    <button on-click="addSubscription">Add</button>
+    <ul>
+      <template repeat="{{ subscriptionList }}">
+	<li>{{ name }}</li>
+      </template>
+    </ul>
     <div class="message-window">
       <ul>
         <template repeat="{{ messages }}">
@@ -47,7 +60,24 @@
         addChannel: function (event) {
             console.log("adding Channel " + this.newChannel);
         },
+        addSubscription: function (event) {
+            var newSubscription = this.$.newSubscription.value;
+            if (!newSubscription) {
+                console.log("no channel selected");
+                return;
+            };
+            console.log("selected channel is " + newSubscription);
+
+            this.subscriptionSet[newSubscription] = 1;
+            var newList = [];
+            for (key in this.subscriptionSet) {
+                newList.push({name: key});
+            };
+            this.subscriptionList = newList;
+        },
         ready: function () {
+            this.subscriptionList = [];
+            this.subscriptionSet = {};
             this.targets = [
                 { shortname: "42six",
                   longname: "42six solutions" },
@@ -60,7 +90,6 @@
                 { shortname: "news",
                   longname: "news" }
             ];
-
         }
         });
   </script>
