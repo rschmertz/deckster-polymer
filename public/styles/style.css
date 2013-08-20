@@ -1,5 +1,5 @@
 body {
-  padding: 50px;
+  padding: 15px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -8,7 +8,7 @@ a {
 }
 
 .deckster-deck {
-    height: 800px;
+    height: 600px;
     border: 1px solid black;
     display: block;
 }

@@ -1,0 +1,58 @@
+<polymer-element name="mini-irc" attributes="selectedTarget newMessage">
+  <template>
+    <div class="message-window">
+      <ul>
+        <template repeat="{{ messages }}">
+          <li>{{ content }}</li>
+        </template>
+      </ul>
+    </div>
+    <select value="selectedTarget">
+      <option></option>
+      <template repeat="{{ targets }}">
+        <option value="{{ shortname }}">{{ longname }}</option>
+      </template>
+    </select>
+    <button class="addChannel" on-click="addChannel">Add Channel</button>
+    <input value="{{ newChannel }}">
+    <textarea id="newMessage" name="textarea" rows="10" cols="35">{{ newMessage }}</textarea>
+    <button class="chatPost" on-click="sendPost">Post</button>
+  </template>
+  <script>
+    Polymer('mini-irc', {
+        newChannel: "",
+        newMessage: "The medium is the massage",
+        messages: [
+            { content: "All your base are belong to us" },
+            { content: "You are on the way to destruction" },
+            { content: "You have no chance to survive make your time" },
+            { content: "HA HA HA HA" }
+        ],
+        targets: [
+            { shortname: "42six",
+              longname: "42six solutions" },
+            { shortname: "bob",
+              longname: "Robert" },
+            { shortname: "jeb",
+              longname: "Jebediah" },
+            { shortname: "uk",
+              longname: "The United Kingdom of Great Britain and Northern Ireland" },
+            { shortname: "news",
+              longname: "news" }
+        ],
+        sendPost: function (event) {
+            // The two-way data-binding isn't working now.
+            console.log("sending the following message to " + this.selectedTarget);
+            console.log(this.newMessage);
+            // This works, though
+            console.log(this.$.newMessage.value);
+        },
+        addChannel: function (event) {
+            console.log("adding Channel " + this.newChannel);
+        },
+        ready: function () {
+            
+        }
+        });
+  </script>
+</polymer-element>
