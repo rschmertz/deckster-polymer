@@ -1,4 +1,4 @@
-<polymer-element name="deckster-deck" attributes="title url">
+<polymer-element name="deckster-deck" attributes="title">
   <template>
     <div class="deckster-deck">
       <div class="deckster-title">
@@ -6,6 +6,7 @@
       </div>
       <div class="deckster-cardholder">
 	{{ content }}
+	<content></content>
       </div>
     </div>
   </template>
@@ -18,9 +19,32 @@
         title: "Deck " + Polymer.deck_counter++,
         content: "Content goes here",
         ready: function () {
-            alert("Making a deck!");
+            //alert("Making a deck!");
         }
     });
 
+  </script>
+</polymer-element>
+
+<polymer-element name="deckster-card" attributes="title">
+  <template>
+    <div class="deckster-card">
+      <div class="deckster-title">
+	{{ title }}
+      </div>
+      <div class="deckster-card-content">
+	{{ content }}
+	<content></content>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer('deckster-card', {
+        title: "Card " + Polymer.deck_counter++,
+        content: "Content goes here",
+        ready: function () {
+            //alert("Making a card!");
+        }
+    });
   </script>
 </polymer-element>

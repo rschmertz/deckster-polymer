@@ -16,3 +16,11 @@ a {
 .deckster-title {
     background: #ddddff;
 }
+
+.deckster-card {
+    width: 300px;
+    height: 500px;
+    border: 1px solid black;
+    margin: 5px;
+    float: left;
+}
