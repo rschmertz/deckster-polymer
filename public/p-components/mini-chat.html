@@ -14,7 +14,7 @@
     <button on-click="addSubscription">Add</button>
     <ul>
       <template repeat="{{ subscriptionList }}">
-	<li>{{ name }}</li>
+        <li>{{ name }}</li>
       </template>
     </ul>
     <div class="message-window">
@@ -24,7 +24,7 @@
         </template>
       </ul>
     </div>
-    <select value="selectedTarget">
+    <select id="selectedTarget" name="selectedTarget">
       <!-- perhaps we make a custom element out of this? -->
       <option></option>
       <template repeat="{{ targets }}">
@@ -56,6 +56,7 @@
             console.log(this.newMessage);
             // This works, though
             console.log(this.$.newMessage.value);
+            this.messenger.sendMessage(this.$.selectedTarget.value, this.$.newMessage.value);
         },
         addChannel: function (event) {
             console.log("adding Channel " + this.newChannel);
@@ -78,10 +79,6 @@
         ready: function () {
             this.subscriptionList = [];
             this.subscriptionSet = {};
-            if (typeof Messenger == "undefined") {
-                console.log("Messenger iundefined");
-            };
-            this.messenger = new Messenger(this.clientID);
             this.targets = [
                 { shortname: "42six",
                   longname: "42six solutions" },
@@ -94,6 +91,7 @@
                 { shortname: "news",
                   longname: "news" }
             ];
+            this.messenger = new ChatClient(this);
         }
         });
   </script>
