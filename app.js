@@ -35,3 +35,13 @@ var server = http.createServer(app)
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var messengerClients = {};
+
+io.sockets.on('connection', function (socket) {
+    //socket.emit('news', "Connected!");
+    socket.on('new client', function (data) {
+        console.log("got new client " + data.clientName);
+        messengerClients[data.clientName] = {};
+    });
+});

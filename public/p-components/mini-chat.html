@@ -78,6 +78,10 @@
         ready: function () {
             this.subscriptionList = [];
             this.subscriptionSet = {};
+            if (typeof Messenger == "undefined") {
+                console.log("Messenger iundefined");
+            };
+            this.messenger = new Messenger(this.clientID);
             this.targets = [
                 { shortname: "42six",
                   longname: "42six solutions" },
