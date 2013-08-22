@@ -8,7 +8,7 @@ exports.listen = function (server) {
         
         // connectionClients keeps track of clients attached to this socket, so
         // they can be de-registered when the connection is broken
-        connectionClients = {};
+        var connectionClients = {};
         //socket.emit('news', "Connected!");
         socket.on('new client', function (data, fn) {
             console.log("got new client " + data.clientName);
