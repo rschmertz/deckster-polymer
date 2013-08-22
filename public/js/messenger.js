@@ -1,9 +1,9 @@
 var Messenger = (function () {
     var socket = io.connect('http://localhost');
 
-    // grouchySet won't let you add an item if it's already in there
+    // grumpySet won't let you add an item if it's already in there
     // stores only strings
-    function GrouchySet() {
+    function GrumpySet() {
         var lookup = {};
         
         this.add = function (key, value) {
@@ -27,7 +27,7 @@ var Messenger = (function () {
         };
 
         this.getKeys = function () {
-            var keylist = [];
+            var keylist = [], key;
             for (key in lookup) {
                 keylist.push(key);
             };
@@ -35,15 +35,17 @@ var Messenger = (function () {
         };
 
         this.notifyUpdate = function () {
+            var key;
             for (key in lookup) {
-                if (true || typeof lookup[key].clientsUpdated == 'function') {
-                    lookup[key].clientsUpdated();
-                };
+                console.log("about to call clientsUpdated for " + key);
+                var value = lookup[key];
+                console.log("uuid for %s is %s", key, value.uuid);
+                value.clientsUpdated();
             };
         };
     };
 
-    var localClients = new GrouchySet();
+    var localClients = new GrumpySet();
 
     // Messenger prototype
     var p_messenger = {
@@ -56,16 +58,32 @@ var Messenger = (function () {
             };
         },
         messengerInit: function (clientName) {
-            this.clientName = clientName;
+            var self = this;
+            //this.component.updateClientID();
             console.log("let's make a socket call");
-            socket.emit("new client", {clientName:clientName});
-            localClients.add(clientName, this);
+            socket.emit("new client", {clientName:clientName}, function(data) {
+                if (data.error) {
+                    self.clientName = data.newName;
+                    self.clientNameRejected(clientName, data.newName);
+                } else {
+                    console.log("server message: " + data.message);
+                    self.clientName = clientName;
+                };
+                console.log("Added " +  self.clientName);
+                //console.log("A.K.A. " + self.clientName);
+                localClients.add(self.clientName, self);
+            });
 
         },
         changeID: function (newName) {
+            console.log("in changeID, newName is %s, clientName is %s", newName, this.clientName);
             localClients.del(this.clientName);
             this.clientName = newName;
             localClients.add(newName, this);
+        },
+        // This is a method that clients should override
+        clientNameRejected: function (requestedName, newName) {
+            console.log("Could not assign the name %s.  Assigned the name %s.  Sorry.", requestedName, newName);
         },
         clients: localClients
     };
