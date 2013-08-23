@@ -1,4 +1,5 @@
 var Messenger = (function () {
+    _M = Messenger;
     var socket = io.connect('http://localhost');
 
     // grumpySet won't let you add an item if it's already in there
@@ -22,6 +23,10 @@ var Messenger = (function () {
             this.notifyUpdate();
         }
 
+        this.reset = function(hash) {
+            lookup = hash;
+        };
+
         this.get = function (key) { return lookup[key]; };
 
         this.getKeys = function () {
@@ -41,12 +46,19 @@ var Messenger = (function () {
         };
     };
 
-    var localClients = new GrumpySet();
+    _M.localClients = new GrumpySet();
+    _M.allClients = new GrumpySet();
+
+    socket.on('clientListUpdate', function (data) {
+        _M.allClients.reset(data.clientList);
+        _M.localClients.notifyUpdate();
+    });
+            
 
     // Messenger prototype
     var p_messenger = {
         sendMessage: function (targetID /* string, for now */, message) {
-            var target = localClients.get(targetID);
+            var target = _M.localClients.get(targetID);
             if (target) {
                 target.receiveMessage(message);
             } else {
@@ -67,21 +79,20 @@ var Messenger = (function () {
                 };
                 console.log("Added " +  self.clientName);
                 //console.log("A.K.A. " + self.clientName);
-                localClients.add(self.clientName, self);
+                _M.localClients.add(self.clientName, self);
             });
 
         },
         changeID: function (newName) {
             console.log("in changeID, newName is %s, clientName is %s", newName, this.clientName);
-            localClients.del(this.clientName);
+            _M.localClients.del(this.clientName);
             this.clientName = newName;
-            localClients.add(newName, this);
+            _M.localClients.add(newName, this);
         },
         // This is a method that clients should override
         clientNameRejected: function (requestedName, newName) {
             console.log("Could not assign the name %s.  Assigned the name %s.  Sorry.", requestedName, newName);
-        },
-        clients: localClients
+        }
     };
 
     function Messenger () {};

@@ -11,16 +11,18 @@ exports.listen = function (server) {
         var connectionClients = {};
         //socket.emit('news', "Connected!");
         socket.on('new client', function (data, fn) {
-            console.log("got new client " + data.clientName);
-            if (messengerClients[data.clientName]) {
-                var newName = "client-" + Math.random();
+            var clientName = data.clientName;
+            console.log("got new client request" + data.clientName);
+            if (messengerClients[clientName]) {
+                clientName = "client-" + Math.random();
                 fn({error: "Houston, we have a problem",
-                    newName: newName});
+                    newName: clientName});
             } else {
-                messengerClients[data.clientName] = {};
-                connectionClients[data.clientName] = {};
-                fn({message: "addedd " + data.clientName});
+                fn({message: "added " + data.clientName});
             };
+            messengerClients[clientName] = {};
+            connectionClients[clientName] = {};
+            io.sockets.emit('clientListUpdate', {clientList: messengerClients});
         });
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');
