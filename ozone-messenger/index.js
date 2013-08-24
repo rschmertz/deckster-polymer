@@ -1,4 +1,14 @@
 exports.listen = function (server) {
+
+    // Create a simple hash that is JSONifiable
+    function getFlatHash (hash) {
+        var keys = {}, key;
+        for (key in hash) {
+            keys[key] = 1;
+        }
+        return keys;
+    }
+
     var io = require('socket.io').listen(server);
 
     // Keep track of all clients to make sure there are no duplicate IDs
@@ -20,9 +30,9 @@ exports.listen = function (server) {
             } else {
                 fn({message: "added " + data.clientName});
             };
-            messengerClients[clientName] = {};
+            messengerClients[clientName] = {socket: socket};
             connectionClients[clientName] = {};
-            io.sockets.emit('clientListUpdate', {clientList: messengerClients});
+            io.sockets.emit('clientListUpdate', {clientList: getFlatHash(messengerClients)});
         });
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');
