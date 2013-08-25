@@ -62,7 +62,13 @@ var Messenger = (function () {
             if (target) {
                 target.receiveMessage(message);
             } else {
-                alert("socket messaging not implemented yet");
+                socket.emit('sendMessage', targetID,
+                            {senderID: this.clientName, message: message},
+                            function(data) {
+                                if (data.success) {
+                                    console.log(data.success);
+                                }
+                            })
             };
         },
         messengerInit: function (clientName) {

@@ -53,7 +53,7 @@
         sendPost: function (event) {
             // The two-way data-binding isn't working now.
             console.log("sending the following message to " + this.selectedTarget);
-            console.log(this.newMessage);
+            console.log(this.newMessage + " (this is probably broken)");
             // This works, though
             console.log(this.$.newMessage.value);
             this.messenger.sendMessage(this.$.selectedTarget.value, this.$.newMessage.value);

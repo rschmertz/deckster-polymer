@@ -34,6 +34,10 @@ exports.listen = function (server) {
             connectionClients[clientName] = {};
             io.sockets.emit('clientListUpdate', {clientList: getFlatHash(messengerClients)});
         });
+        socket.on('sendMessage', function (target, data, fn) {
+            console.log('sendMessage called for %s with data ' + data.message, target);
+            fn({success: 'received sendMessage'});
+        });
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');
             for (var key in connectionClients) {
