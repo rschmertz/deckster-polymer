@@ -36,7 +36,15 @@ exports.listen = function (server) {
         });
         socket.on('sendMessage', function (target, data, fn) {
             console.log('sendMessage called for %s with data ' + data.message, target);
-            fn({success: 'received sendMessage'});
+            try {
+                var targetSocket = messengerClients[target].socket;
+                targetSocket.emit('receive message', target, data);
+                fn({success: 'received sendMessage'});
+            } catch (e) {
+                var msg = "Error forwarding message: perhaps " + target + " does not exist";
+                console.log(e + ": " + msg);
+                fn({error: msg});
+            };
         });
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');

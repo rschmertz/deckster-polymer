@@ -4,6 +4,7 @@ ChatClient = (function () {
         this.component = _component;
         this.receiveMessage = function (message) {
             console.log("chat client %s received message: %s", this.clientName, message);
+            _component.messages.push({content: message.message});
         };
         this.clientsUpdated = function () {
             var keylist = Messenger.allClients.getKeys();

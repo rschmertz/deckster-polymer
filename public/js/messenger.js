@@ -53,7 +53,11 @@ var Messenger = (function () {
         _M.allClients.reset(data.clientList);
         _M.localClients.notifyUpdate();
     });
-            
+
+    socket.on('receive message', function (targetID, data) {
+        _M.localClients.get(targetID).receiveMessage(data);
+        console.log("message received");
+    });;
 
     // Messenger prototype
     var p_messenger = {
