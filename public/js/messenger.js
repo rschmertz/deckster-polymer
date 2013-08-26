@@ -93,11 +93,14 @@ var Messenger = (function () {
             });
 
         },
+        disconnect: function () {
+            _M.localClients.del(this.clientName);
+            socket.emit('drop client', this.clientName);
+        },
         changeID: function (newName) {
             console.log("in changeID, newName is %s, clientName is %s", newName, this.clientName);
-            _M.localClients.del(this.clientName);
-            this.clientName = newName;
-            _M.localClients.add(newName, this);
+            this.disconnect();
+            this.messengerInit(newName);
         },
         // This is a method that clients should override
         clientNameRejected: function (requestedName, newName) {

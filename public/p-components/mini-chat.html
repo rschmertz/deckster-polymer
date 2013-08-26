@@ -48,6 +48,7 @@
         ],
         updateClientID: function (event) {
             this.clientID = this.newClientID;
+            this.messenger.changeID(this.clientID);
         },
         
         sendPost: function (event) {

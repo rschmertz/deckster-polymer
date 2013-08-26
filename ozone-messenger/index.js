@@ -20,7 +20,7 @@ exports.listen = function (server) {
         // they can be de-registered when the connection is broken
         var connectionClients = {};
         //socket.emit('news', "Connected!");
-        socket.on('new client', function (data, fn) {
+        socket.on('new client', function newClient (data, fn) {
             var clientName = data.clientName;
             console.log("got new client request" + data.clientName);
             if (messengerClients[clientName]) {
@@ -46,6 +46,21 @@ exports.listen = function (server) {
                 fn({error: msg});
             };
         });
+
+        socket.on('drop client', function dropClient (clientName) {
+            if (typeof connectionClients[clientName] == 'undefined') {
+                console.log("Client %s does not belong to the socket requesting disconnect", clientName);
+                return;
+            };
+            delete messengerClients[clientName];
+            delete connectionClients[clientName];
+        });
+
+        socket.on('changeID', function (oldName, newName) {
+            dropClient(oldName);
+            newClient({clientName: newName});
+        });
+            
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');
             for (var key in connectionClients) {
