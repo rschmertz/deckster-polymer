@@ -64,7 +64,7 @@ var Messenger = (function () {
         sendMessage: function (targetID /* string, for now */, message) {
             var target = _M.localClients.get(targetID);
             if (target) {
-                target.receiveMessage(message);
+                target.receiveMessage({senderID: this.clientName, message: message});
             } else {
                 socket.emit('sendMessage', targetID,
                             {senderID: this.clientName, message: message},
