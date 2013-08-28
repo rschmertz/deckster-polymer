@@ -48,9 +48,16 @@ var Messenger = (function () {
 
     _M.localClients = new GrumpySet();
     _M.allClients = new GrumpySet();
+    _M.allChannels = new GrumpySet();
 
     socket.on('clientListUpdate', function (data) {
         _M.allClients.reset(data.clientList);
+        _M.localClients.notifyUpdate();
+    });
+
+    socket.on('channelListUpdate', function(response) {
+        console.log('new channel list: ' + response.channelList);
+        _M.allChannels.reset(response.channelList);
         _M.localClients.notifyUpdate();
     });
 
@@ -74,6 +81,13 @@ var Messenger = (function () {
                                 }
                             })
             };
+        },
+        createChannel: function (channelName, options) {            
+            socket.emit('create channel', channelName, this.clientName, options, function(response) {
+                if (response.error) {
+                    console.log("Error creating channel: " + response.error);
+                }
+            });
         },
         messengerInit: function (clientName) {
             var self = this;

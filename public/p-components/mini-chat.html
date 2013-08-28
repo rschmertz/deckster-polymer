@@ -61,6 +61,13 @@
         },
         addChannel: function (event) {
             console.log("adding Channel " + this.newChannel);
+            if (this.newChannel) {
+                this.messenger.createChannel(this.newChannel,
+                                             {
+                                                 channelType: "open",
+                                                 dataType: "chat"
+                                             });
+            };
         },
         addSubscription: function (event) {
             var newSubscription = this.$.newSubscription.value;

@@ -1,18 +1,34 @@
 exports.listen = function (server) {
 
-    // Create a simple hash that is JSONifiable
-    function getFlatHash (hash) {
+    function obj_map(hash, fn) {
         var keys = {}, key;
         for (key in hash) {
-            keys[key] = 1;
-        }
+            
+            keys[key] = (typeof fn == 'function') ? fn(hash[key]) : {};
+        };
         return keys;
+    };
+        
+    // Create a simple hash that is JSONifiable
+    function getFlatHash (hash) {
+        return obj_map(hash);
     }
 
     var io = require('socket.io').listen(server);
 
     // Keep track of all clients to make sure there are no duplicate IDs
     var messengerClients = {};
+    var channels = {};
+
+    function broadcastChannelList() {
+        var channelListOut = obj_map(channels, function (channel) {
+            return {
+                name: channel.name,
+                options: channel.options
+            }
+        });
+        io.sockets.emit('channelListUpdate', {channelList: channelListOut});
+    };
     
     io.sockets.on('connection', function (socket) {
         
@@ -34,6 +50,20 @@ exports.listen = function (server) {
             connectionClients[clientName] = {};
             io.sockets.emit('clientListUpdate', {clientList: getFlatHash(messengerClients)});
         });
+
+        socket.on('create channel', function (channelName, creatorName, options, fn) {
+            if (channelName in channels || channelName in messengerClients) {
+                fn({error: "The name "+channelName+" is already in use"});
+                return;
+            };
+            channels[channelName] = { name: channelName,
+                                      creatorName: creatorName,
+                                      socket: socket,
+                                      subscribers: {},
+                                      options: options };
+
+            broadcastChannelList();
+        });         
         socket.on('sendMessage', function (target, data, fn) {
             console.log('sendMessage called for %s with data ' + data.message, target);
             try {
@@ -68,5 +98,6 @@ exports.listen = function (server) {
             };
             connectionClients = {};
         });
+        broadcastChannelList()
     });
 };
