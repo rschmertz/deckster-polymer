@@ -96,6 +96,9 @@ exports.listen = function (server) {
                     };
                     console.log("Target sockets are:");
                     console.dir(targetSockets);
+                    for (var socketid in targetSockets) {
+                        allSockets[socketid].emit('receive message', targetID, data);
+                    };
                 };
                 fn({success: 'received sendMessage'});
             } catch (e) {

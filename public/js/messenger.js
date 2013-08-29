@@ -71,7 +71,10 @@ var Messenger = (function () {
     });
 
     socket.on('receive message', function (targetID, data) {
-        _M.localClients.get(targetID).receiveMessage(data);
+        var receiverClients = channelSubscribers.get(targetID) || { foo: _M.localClients.get(targetID) };
+        for (key in receiverClients) {
+            receiverClients[key].receiveMessage(data);
+        };
         console.log("message received");
     });;
 
