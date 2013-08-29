@@ -83,6 +83,7 @@
                 newList.push({name: key});
             };
             this.subscriptionList = newList;
+            this.messenger.subscribe(newSubscription);
         },
         ready: function () {
             this.subscriptionList = [];

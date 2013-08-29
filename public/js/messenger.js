@@ -4,7 +4,7 @@ var Messenger = (function () {
 
     // grumpySet won't let you add an item if it's already in there
     // stores only strings
-    function GrumpySet() {
+    function GrumpySet(setname, updateCB) {
         var lookup = {};
         
         this.add = function (key, value) {
@@ -15,12 +15,13 @@ var Messenger = (function () {
                 }
             };
             lookup[key] = value;
-            this.notifyUpdate();
+            console.log("in grumpy add");
+            updateCB && updateCB();
         }
 
         this.del = function (key) {
             delete lookup[key];
-            this.notifyUpdate();
+            updateCB && updateCB();
         }
 
         this.reset = function(hash) {
@@ -41,14 +42,36 @@ var Messenger = (function () {
             var key;
             for (key in lookup) {
                 var value = lookup[key];
-                value.clientsUpdated();
+                if (typeof value == "undefined") {
+                    console.log("lookup problem.  key is %s, lookup is %s", key, lookup);
+                    console.log("problem in " + setname);
+                };
+                if (typeof value.clientsUpdated == "function") {
+                    value.clientsUpdated();
+                };
             };
+        };
+
+        this.map = function (f) {
+            var newArray = {}, key;
+            for (key in lookup) {
+                var value = lookup[key];
+                newArray[key] = f(value);
+            };
+            return newArray;
         };
     };
 
-    _M.localClients = new GrumpySet();
-    _M.allClients = new GrumpySet();
-    _M.allChannels = new GrumpySet();
+    function localClientsUpdate() {
+        _M.localClients.map(function (value) {
+            value.clientsUpdated();
+        });
+    };
+
+    _M.localClients = new GrumpySet("localClients", localClientsUpdate);
+    _M.allClients = new GrumpySet("allClients", localClientsUpdate);
+    _M.allChannels = new GrumpySet("allChannels", localClientsUpdate);
+    var channelSubscribers = new GrumpySet("channelSubscribers");
 
     socket.on('clientListUpdate', function (data) {
         _M.allClients.reset(data.clientList);
@@ -56,7 +79,8 @@ var Messenger = (function () {
     });
 
     socket.on('channelListUpdate', function(response) {
-        console.log('new channel list: ' + response.channelList);
+        console.log('new channel list: ');
+        console.dir(response.channelList);
         _M.allChannels.reset(response.channelList);
         _M.localClients.notifyUpdate();
     });
@@ -69,6 +93,8 @@ var Messenger = (function () {
     // Messenger prototype
     var p_messenger = {
         sendMessage: function (targetID /* string, for now */, message) {
+            var channel = _M.allChannels.get(targetID);
+            //if (channel && (channel.channelType != "open"
             var target = _M.localClients.get(targetID);
             if (target) {
                 target.receiveMessage({senderID: this.clientName, message: message});
@@ -87,6 +113,24 @@ var Messenger = (function () {
                 if (response.error) {
                     console.log("Error creating channel: " + response.error);
                 }
+            });
+        },
+        subscribe: function (channelName) {
+            var channel = channelSubscribers.get(channelName);
+            if (!channel) {
+                channel = {};
+                channelSubscribers.add(channelName, channel);
+            };
+            if (channel[this.clientName]) {
+                console.log("this client already subscribed to this channel");
+                return;
+            };
+            channel[this.clientName] = this;
+            socket.emit('subscribe', channelName, this.clientName, function(result) {
+                if (result.error) {
+                    console.log("Subscription failed: " + result.error);
+                    delete channel[this.clientName];
+                };
             });
         },
         messengerInit: function (clientName) {
