@@ -26,6 +26,7 @@ var Messenger = (function () {
 
         this.reset = function(hash) {
             lookup = hash;
+            updateCB && updateCB();
         };
 
         this.get = function (key) { return lookup[key]; };
@@ -36,20 +37,6 @@ var Messenger = (function () {
                 keylist.push(key);
             };
             return keylist;
-        };
-
-        this.notifyUpdate = function () {
-            var key;
-            for (key in lookup) {
-                var value = lookup[key];
-                if (typeof value == "undefined") {
-                    console.log("lookup problem.  key is %s, lookup is %s", key, lookup);
-                    console.log("problem in " + setname);
-                };
-                if (typeof value.clientsUpdated == "function") {
-                    value.clientsUpdated();
-                };
-            };
         };
 
         this.map = function (f) {
@@ -75,14 +62,12 @@ var Messenger = (function () {
 
     socket.on('clientListUpdate', function (data) {
         _M.allClients.reset(data.clientList);
-        _M.localClients.notifyUpdate();
     });
 
     socket.on('channelListUpdate', function(response) {
         console.log('new channel list: ');
         console.dir(response.channelList);
         _M.allChannels.reset(response.channelList);
-        _M.localClients.notifyUpdate();
     });
 
     socket.on('receive message', function (targetID, data) {
@@ -135,8 +120,6 @@ var Messenger = (function () {
         },
         messengerInit: function (clientName) {
             var self = this;
-            //this.component.updateClientID();
-            console.log("let's make a socket call");
             socket.emit("new client", {clientName:clientName}, function(data) {
                 if (data.error) {
                     self.clientName = data.newName;
@@ -146,7 +129,6 @@ var Messenger = (function () {
                     self.clientName = clientName;
                 };
                 console.log("Added " +  self.clientName);
-                //console.log("A.K.A. " + self.clientName);
                 _M.localClients.add(self.clientName, self);
             });
 

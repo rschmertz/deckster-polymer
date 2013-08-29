@@ -48,9 +48,9 @@ exports.listen = function (server) {
             } else {
                 fn({message: "added " + data.clientName});
             };
-            messengerClients[clientName] = {socket: socket.id};
+            messengerClients[clientName] = {socketid: socket.id};
             connectionClients[clientName] = {};
-            io.sockets.emit('clientListUpdate', {clientList: getFlatHash(messengerClients)});
+            io.sockets.emit('clientListUpdate', {clientList: messengerClients});
         });
 
         socket.on('create channel', function (channelName, creatorName, options, fn) {
@@ -69,7 +69,7 @@ exports.listen = function (server) {
         socket.on('subscribe', function (channelName, clientName, fn) {
             var channel = channels[channelName];
             if (!channel) {
-                fn(channel + "No such channel");
+                fn(channel + ": no such channel");
                 return;
             };
             try {
@@ -79,27 +79,27 @@ exports.listen = function (server) {
             };
             fn({ success: clientName + "Successfully subscribed to channel " + channelName});
         });
-        socket.on('sendMessage', function (target, data, fn) {
-            console.log('sendMessage called for %s with data ' + data.message, target);
+        socket.on('sendMessage', function (targetID, data, fn) {
+            console.log('sendMessage called for %s with data ' + data.message, targetID);
             try {
-                var targetObj = messengerClients[target];
-                var channel = channels[target];
+                var targetObj = messengerClients[targetID];
+                var channel = channels[targetID];
                 if (targetObj) {
-                    var targetSocket = allSockets[targetObj.socket];
-                targetSocket.emit('receive message', target, data);
+                    var targetSocket = allSockets[targetObj.socketid];
+                    targetSocket.emit('receive message', targetID, data);
                 } else if (channel) {
-                    console.log(target + " is a channel.  Whoopee.");
+                    console.log(targetID + " is a channel.  Whoopee.");
                     var targetSockets = {};
                     for (clientid in channel.subscribers) {
                         // Add the relevent socket for this client to the set
-                        targetSockets[messengerClients[clientid].socket] = 1
+                        targetSockets[messengerClients[clientid].socketid] = 1
                     };
                     console.log("Target sockets are:");
                     console.dir(targetSockets);
                 };
                 fn({success: 'received sendMessage'});
             } catch (e) {
-                var msg = "Error forwarding message: perhaps " + target + " does not exist";
+                var msg = "Error forwarding message: perhaps " + targetID + " does not exist";
                 console.log(e + ": " + msg);
                 fn({error: msg});
             };
