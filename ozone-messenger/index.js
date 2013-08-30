@@ -62,8 +62,9 @@ exports.sendMessage = function (targetID, data, fn, socketid) {
                 };
                 if (errmsg != '') {
                     fn({error: errmsg});
+                    console.log("Nice try, beagleface");
+                    return;
                 };
-                return;
             };
             var targetSockets = {};
             for (clientid in channel.subscribers) {
