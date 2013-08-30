@@ -29,21 +29,21 @@ function broadcastChannelList() {
     io.sockets.emit('channelListUpdate', {channelList: channelListOut});
 };
 
-exports.createChannel =  function (channelName, creatorName, options, fn) {
+exports.createChannel =  function (channelName, creatorName, options, fn, socketid) {
     if (channelName in channels || channelName in messengerClients) {
-        fn({error: "The name "+channelName+" is already in use"});
+        fn({error: "The name " + channelName + " is already in use"});
         return;
     };
     channels[channelName] = { name: channelName,
                               creatorName: creatorName,
-                              //socketid: socket.id,
+                              socketid: socketid,
                               subscribers: {},
                               options: options };
 
     broadcastChannelList();
 };
 
-exports.sendMessage = function (targetID, data, fn) {
+exports.sendMessage = function (targetID, data, fn, socketid) {
     console.log('sendMessage called for %s with data ' + data.message, targetID);
     try {
         var targetObj = messengerClients[targetID];
@@ -52,7 +52,19 @@ exports.sendMessage = function (targetID, data, fn) {
             var targetSocket = allSockets[targetObj.socketid];
             targetSocket.emit('receive message', targetID, data);
         } else if (channel) {
-            console.log(targetID + " is a channel.  Whoopee.");
+            var errmsg = '';
+            if (channel.options.channelType == "oneway") {
+                if (data.senderID != channel.creatorName) {
+                    errmsg += "ID " + data.senderID + " doesn't match creator name " + channel.creatorName + "; ";
+                };
+                if (socketid != channel.socketid) {
+                    errmsg += "calling socket ID " + socketid + " doesn't match socket ID of channel creator " + channel.socketid;
+                };
+                if (errmsg != '') {
+                    fn({error: errmsg});
+                };
+                return;
+            };
             var targetSockets = {};
             for (clientid in channel.subscribers) {
                 // Add the relevent socket for this client to the set
@@ -97,7 +109,9 @@ exports.listen = function (server) {
             io.sockets.emit('clientListUpdate', {clientList: messengerClients});
         });
 
-        socket.on('create channel', exports.createChannel);
+        socket.on('create channel', function (channelName, creatorName, options, fn) {
+            exports.createChannel(channelName, creatorName, options, fn, socket.id);
+        });
         socket.on('subscribe', function (channelName, clientName, fn) {
             var channel = channels[channelName];
             if (!channel) {
@@ -111,7 +125,9 @@ exports.listen = function (server) {
             };
             fn({ success: clientName + "Successfully subscribed to channel " + channelName});
         });
-        socket.on('sendMessage', exports.sendMessage);
+        socket.on('sendMessage', function (targetID, data, fn) {
+            exports.sendMessage(targetID, data, fn, socket.id);
+        });
         socket.on('drop client', function dropClient (clientName) {
             if (typeof connectionClients[clientName] == 'undefined') {
                 console.log("Client %s does not belong to the socket requesting disconnect", clientName);
