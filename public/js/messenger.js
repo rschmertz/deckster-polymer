@@ -92,7 +92,9 @@ var Messenger = (function () {
                             function(data) {
                                 if (data.success) {
                                     console.log(data.success);
-                                }
+                                } else if (data.error) {
+                                    console.log("Error: " + data.error);
+                                };
                             })
             };
         },

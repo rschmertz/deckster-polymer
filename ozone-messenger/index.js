@@ -52,16 +52,17 @@ exports.sendMessage = function (targetID, data, fn, socketid) {
             var targetSocket = allSockets[targetObj.socketid];
             targetSocket.emit('receive message', targetID, data);
         } else if (channel) {
-            var errmsg = '';
+            var errors = [];
             if (channel.options.channelType == "oneway") {
                 if (data.senderID != channel.creatorName) {
-                    errmsg += "ID " + data.senderID + " doesn't match creator name " + channel.creatorName + "; ";
+                    errors.push("ID " + data.senderID + " doesn't match creator name " + channel.creatorName);
                 };
                 if (socketid != channel.socketid) {
-                    errmsg += "calling socket ID " + socketid + " doesn't match socket ID of channel creator " + channel.socketid;
+                    errors.push("calling socket ID " + socketid + " doesn't match socket ID of channel creator " + channel.socketid);
                 };
-                if (errmsg != '') {
-                    fn({error: errmsg});
+                if (errors.length != 0) {
+                    fn({error: "Client not authorized to write to this channel",
+                       details: errors});
                     console.log("Nice try, beagleface");
                     return;
                 };
