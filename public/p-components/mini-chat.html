@@ -4,17 +4,21 @@
     <input value="{{ newClientID }}">
     <button on-click="updateClientID">Set</button>
     <b>{{ clientID }}</b>
+    <div>
     Subscribe to a channel:
+    <div>
     <select value="newSubscription" id="newSubscription">
       <option></option>
-      <template repeat="{{ targets }}">
+      <template repeat="{{ channels }}">
         <option value="{{ shortname }}">{{ longname }}</option>
       </template>
     </select>
-    <button on-click="addSubscription">Add</button>
+    <button on-click="addSubscription">Subscribe</button>
+    </div>
+    </div>
     <ul>
       <template repeat="{{ subscriptionList }}">
-	<li>{{ name }}</li>
+        <li>{{ name }}</li>
       </template>
     </ul>
     <div class="message-window">
@@ -24,17 +28,20 @@
         </template>
       </ul>
     </div>
-    <select value="selectedTarget">
+    <button class="addChannel" on-click="addChannel">Add Channel</button>
+    <input value="{{ newChannel }}">
+    <div>
+    Select message target (user or channel):
+    <select id="selectedTarget" name="selectedTarget">
       <!-- perhaps we make a custom element out of this? -->
       <option></option>
       <template repeat="{{ targets }}">
         <option value="{{ shortname }}">{{ longname }}</option>
       </template>
     </select>
-    <button class="addChannel" on-click="addChannel">Add Channel</button>
-    <input value="{{ newChannel }}">
     <textarea id="newMessage" name="textarea" rows="10" cols="35">{{ newMessage }}</textarea>
     <button class="chatPost" on-click="sendPost">Post</button>
+    </div>
   </template>
   <script>
     Polymer('mini-irc', {
@@ -89,6 +96,13 @@
                   longname: "The United Kingdom of Great Britain blah blah" },
                 { shortname: "news",
                   longname: "news" }
+            ];
+            this.messages = [];
+            this.channels = [
+                {
+                    shortname: "english",
+                    longname: "English Channel"
+                }
             ];
         }
         });
