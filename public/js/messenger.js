@@ -2,8 +2,14 @@ var Messenger = (function () {
     _M = Messenger;
     var socket = io.connect('http://localhost');
 
-    // grumpySet won't let you add an item if it's already in there
-    // stores only strings
+    /*
+     GrumpySet won't let you add an item if it's already in there.
+     stores only strings.
+
+     Takes an optional setname parameter (currently only used for debugging),
+     followed by an optional callback to be called whenever modifications are
+     made to the set.
+    */
     function GrumpySet(setname, updateCB) {
         var lookup = {};
         
@@ -49,14 +55,23 @@ var Messenger = (function () {
         };
     };
 
+    /*
+      Callback passed to GrumpySet for Messenger clients.  We want each local
+      client to run its clientsUpdated method in case the client maintains a
+      list of all clients.
+     */
     function localClientsUpdate() {
         _M.localClients.map(function (value) {
             value.clientsUpdated();
         });
     };
 
+    // All clients in this browser window
     _M.localClients = new GrumpySet("localClients", localClientsUpdate);
+    // All clients in the entire system -- in other browser windows, and on
+    // other computers, but attached to this server.
     _M.allClients = new GrumpySet("allClients", localClientsUpdate);
+    // All channels served by the system.
     _M.allChannels = new GrumpySet("allChannels", localClientsUpdate);
     var channelSubscribers = new GrumpySet("channelSubscribers");
 
@@ -70,6 +85,12 @@ var Messenger = (function () {
         _M.allChannels.reset(response.channelList);
     });
 
+    /*
+      The server has sent a message to targetID, which could be either a
+      client or a channel.  Find the client, or, if targetID is a channel,
+      find all local clients subscribed to the channel, and call the
+      receiveMessage method of those clients.
+     */
     socket.on('receive message', function (targetID, data) {
         var receiverClients = channelSubscribers.get(targetID) || { foo: _M.localClients.get(targetID) };
         for (key in receiverClients) {
@@ -98,6 +119,12 @@ var Messenger = (function () {
                             })
             };
         },
+        /*
+          Any client can create a channel.  That channel must have a name not
+          currently used by any existing client or channel.  If the client
+          sends channelType: "oneway" in the options hash, then only the
+          creating client can send messages on this channel.
+         */
         createChannel: function (channelName, options) {            
             socket.emit('create channel', channelName, this.clientName, options, function(response) {
                 if (response.error) {
@@ -105,6 +132,7 @@ var Messenger = (function () {
                 }
             });
         },
+        // Subscribe to a channel
         subscribe: function (channelName) {
             var channel = channelSubscribers.get(channelName);
             if (!channel) {
@@ -123,11 +151,13 @@ var Messenger = (function () {
                 };
             });
         },
+        // Clients must call messengerInit after doing their own initialization.
         messengerInit: function (clientName) {
             var self = this;
             socket.emit("new client", {clientName:clientName}, function(data) {
                 if (data.error) {
                     self.clientName = data.newName;
+                    // TODO: provide a default implementation for clientNameRejected
                     self.clientNameRejected(clientName, data.newName);
                 } else {
                     console.log("server message: " + data.message);
@@ -138,12 +168,21 @@ var Messenger = (function () {
             });
 
         },
+        /*
+          Cleanup behavior before a client disconnects.
+         */
         disconnect: function () {
             _M.localClients.del(this.clientName);
             socket.emit('drop client', this.clientName);
         },
+        /*
+          Allow a client to change its ID.  This is useful especially if the
+          initially requreted name was rejected, and the server has assigned a
+          randomly-generated name to the client.
+         */
         changeID: function (newName) {
             console.log("in changeID, newName is %s, clientName is %s", newName, this.clientName);
+            // TODO: potential race condition here?
             this.disconnect();
             this.messengerInit(newName);
         },

@@ -1,3 +1,8 @@
+/*
+  Like .map in ES6, but for an object.  If no fn is supplied, supply an empty
+  object as the value.  This latter case can be useful for creating a
+  serializable hash where the keys are the only thing that is important.
+*/
 function obj_map(hash, fn) {
     var keys = {}, key;
     for (key in hash) {
@@ -14,11 +19,15 @@ function getFlatHash (hash) {
 
 var io;
 
+// Unique sockets as defined by socket.io.  keys are socket.id's (provided by
+// socket.io), and values are the socket objects.
 var allSockets = {};
 // Keep track of all clients to make sure there are no duplicate IDs
 var messengerClients = {};
 var channels = {};
 
+// Broadcast the list of channels to all clients.  This is normally called
+// when the list of available channels changes
 function broadcastChannelList() {
     var channelListOut = obj_map(channels, function (channel) {
         return {
@@ -29,6 +38,11 @@ function broadcastChannelList() {
     io.sockets.emit('channelListUpdate', {channelList: channelListOut});
 };
 
+/*
+  create a channel.  socketid may be undefined (i.e., not provided in the
+  argument list) if the "client" is internal to the server.  See sendMessage
+  to get an idea of how socketid is used.
+*/
 exports.createChannel =  function (channelName, creatorName, options, fn, socketid) {
     if (channelName in channels || channelName in messengerClients) {
         fn({error: "The name " + channelName + " is already in use"});
@@ -42,7 +56,14 @@ exports.createChannel =  function (channelName, creatorName, options, fn, socket
 
     broadcastChannelList();
 };
+/*
+  Handler for when a client calls 'sendMessage' on socket.io.  Identifies the
+  socket that has the target client (from targetID), or sockets that have
+  subscribing clients if targetID refers to a channel, and sends a 'receive
+  message' with the data to those sockets.
 
+  Can also be called by a "client" that is internal to the server.
+*/
 exports.sendMessage = function (targetID, data, fn, socketid) {
     console.log('sendMessage called for %s with data ' + data.message, targetID);
     try {
@@ -53,6 +74,9 @@ exports.sendMessage = function (targetID, data, fn, socketid) {
             targetSocket.emit('receive message', targetID, data);
         } else if (channel) {
             var errors = [];
+            // If channelType is "oneway", the socketid and the targetID are
+            // used together to check that the sender is the creator of the
+            // channel.
             if (channel.options.channelType == "oneway") {
                 if (data.senderID != channel.creatorName) {
                     errors.push("ID " + data.senderID + " doesn't match creator name " + channel.creatorName);
@@ -63,7 +87,6 @@ exports.sendMessage = function (targetID, data, fn, socketid) {
                 if (errors.length != 0) {
                     fn({error: "Client not authorized to write to this channel",
                        details: errors});
-                    console.log("Nice try, beagleface");
                     return;
                 };
             };
@@ -86,6 +109,10 @@ exports.sendMessage = function (targetID, data, fn, socketid) {
     };
 };
 
+/*
+  Essentially the "main" for the messenger bus.  Set up all the server-side
+  handlers (many of which are defined above as separate functions).
+*/
 exports.listen = function (server) {
 
     io = require('socket.io').listen(server);
@@ -94,14 +121,13 @@ exports.listen = function (server) {
         // connectionClients keeps track of clients attached to this socket, so
         // they can be de-registered when the connection is broken
         var connectionClients = {};
-        //socket.emit('news', "Connected!");
         allSockets[socket.id] = socket;
         socket.on('new client', function newClient (data, fn) {
             var clientName = data.clientName;
             console.log("got new client request" + data.clientName);
             if (messengerClients[clientName]) {
                 clientName = "client-" + Math.random();
-                fn({error: "Houston, we have a problem",
+                fn({error: "Rejecting requested name -- already exists",
                     newName: clientName});
             } else {
                 fn({message: "added " + data.clientName});
@@ -114,6 +140,7 @@ exports.listen = function (server) {
         socket.on('create channel', function (channelName, creatorName, options, fn) {
             exports.createChannel(channelName, creatorName, options, fn, socket.id);
         });
+        // subscribe to a channel
         socket.on('subscribe', function (channelName, clientName, fn) {
             var channel = channels[channelName];
             if (!channel) {
@@ -143,7 +170,14 @@ exports.listen = function (server) {
             dropClient(oldName);
             newClient({clientName: newName});
         });
-            
+
+        /*
+         This essentially covers the case where this socket closes (browser
+         window closes, navigates away from the page, or other reasons).
+         Delete all references to clients hosted on the corresponding page, so
+         the names can be reused (esp. if the reason for the disconnect was a
+         browser refresh).
+        */
         socket.on('disconnect', function () {
             console.log('Hey, browser disconnected');
             for (var key in connectionClients) {
@@ -151,6 +185,7 @@ exports.listen = function (server) {
             };
             connectionClients = {};
         });
+        // Not sure we need this...
         broadcastChannelList()
     });
 };
