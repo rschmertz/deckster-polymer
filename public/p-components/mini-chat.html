@@ -5,16 +5,16 @@
     <button on-click="updateClientID">Set</button>
     <b>{{ clientID }}</b>
     <div>
-    Subscribe to a channel:
-    <div>
-    <select value="newSubscription" id="newSubscription">
-      <option></option>
-      <template repeat="{{ channels }}">
-        <option value="{{ shortname }}">{{ longname }}</option>
-      </template>
-    </select>
-    <button on-click="addSubscription">Subscribe</button>
-    </div>
+      Subscribe to a channel:
+      <div>
+        <select value="newSubscription" id="newSubscription">
+          <option></option>
+          <template repeat="{{ channels }}">
+            <option value="{{ shortname }}">{{ longname }}</option>
+          </template>
+        </select>
+        <button on-click="addSubscription">Subscribe</button>
+      </div>
     </div>
     <ul>
       <template repeat="{{ subscriptionList }}">
@@ -34,13 +34,13 @@
     Select message target (user or channel):
     <select id="selectedTarget" name="selectedTarget">
       <!-- perhaps we make a custom element out of this? -->
-      <option></option>
-      <template repeat="{{ targets }}">
-        <option value="{{ shortname }}">{{ longname }}</option>
-      </template>
-    </select>
-    <textarea id="newMessage" name="textarea" rows="10" cols="35">{{ newMessage }}</textarea>
-    <button class="chatPost" on-click="sendPost">Post</button>
+        <option></option>
+        <template repeat="{{ targets }}">
+          <option value="{{ shortname }}">{{ longname }}</option>
+        </template>
+      </select>
+      <textarea id="newMessage" name="textarea" rows="10" cols="35">{{ newMessage }}</textarea>
+      <button class="chatPost" on-click="sendPost">Post</button>
     </div>
   </template>
   <script>
