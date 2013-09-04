@@ -31,9 +31,9 @@
     <button class="addChannel" on-click="addChannel">Add Channel</button>
     <input value="{{ newChannel }}">
     <div>
-    Select message target (user or channel):
-    <select id="selectedTarget" name="selectedTarget">
-      <!-- perhaps we make a custom element out of this? -->
+      Select message target (user or channel):
+      <select id="selectedTarget" name="selectedTarget">
+        <!-- perhaps we make a custom element out of this? -->
         <option></option>
         <template repeat="{{ targets }}">
           <option value="{{ shortname }}">{{ longname }}</option>
