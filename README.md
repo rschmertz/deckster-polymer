@@ -14,3 +14,5 @@ This is a Node.js/Express project, so also do a simple `npm install` in the dire
 Then run `make`
 
 Then run `node app`.
+
+To view the demo, visit http://localhost:3000/deckster.html.
