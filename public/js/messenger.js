@@ -101,6 +101,16 @@ var Messenger = (function () {
 
     // Messenger prototype
     var p_messenger = {
+        /*
+         * CORE METHODS
+         *
+         * The methods in this section should NOT be overridden in a child
+         * class. Unless you really want to. But don't say I didn't warn you.
+         */
+
+        /*
+          sendMessage - send data of any type to a client.          
+         */
         sendMessage: function (targetID /* string, for now */, message) {
             var channel = _M.allChannels.get(targetID);
             //if (channel && (channel.channelType != "open"
@@ -163,8 +173,8 @@ var Messenger = (function () {
                     console.log("server message: " + data.message);
                     self.clientName = clientName;
                 };
-                console.log("Added " +  self.clientName);
                 _M.localClients.add(self.clientName, self);
+                console.log("Added " +  self.clientName);
             });
 
         },
@@ -186,7 +196,21 @@ var Messenger = (function () {
             this.disconnect();
             this.messengerInit(newName);
         },
-        // This is a method that clients should override
+
+        /*
+         * CLIENT SECTION
+         *
+         * The following are default methods that a child class may override
+         */
+
+        receiveMessage: function (message) {
+            console.log("Client " + this.clientName + " should override the receiveMessage method");
+            console.log("Received message:");
+            console.dir(message);
+        },
+        clientsUpdated: function () {
+            console.log('clientsUpdated called on ' + this.clientName);
+        },
         clientNameRejected: function (requestedName, newName) {
             console.log("Could not assign the name %s.  Assigned the name %s.  Sorry.", requestedName, newName);
         }
