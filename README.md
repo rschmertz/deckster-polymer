@@ -15,7 +15,7 @@ Then run `make`
 
 Then run `node app`.
 
-To view the demo, visit http://localhost:3000/deckster.html.
+To view the demo, visit [http://localhost:3000/deckster.html](http://localhost:3000/deckster.html).
 
 Target capabilities for Messenger
 -----------
