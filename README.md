@@ -15,6 +15,8 @@ Then run `make`
 
 Then run `node app`.
 
+To view the demo, visit http://localhost:3000/deckster.html.
+
 Target capabilities for Messenger
 -----------
 The goal of the Messenger component is to support the following types of communication:
