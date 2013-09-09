@@ -52,4 +52,64 @@ There are two more broad categories of channel:
   </dl>
 </dl>
 
-I hope that clarifies everything.
+Client API
+----------
+A client should inherit off the Messenger class.  The example below uses JavaScript's prototypal inheritance, but other types of inheritance may work as well:
+
+``` javascript
+function MyClient(options) {
+    this.foo = options.foo;
+    this.myClientName = options.name;
+
+    /*
+      Clients should implement receiveMessage.  While a default implementation
+      is provided, it's hard to imagine a useful client that doesn't implement
+      this method.
+     */
+    this.receiveMessage = function (message) {
+        console.log("chat client %s received message: %s", this.myClientName, message);
+    };
+
+    /*
+      Calling messengerInit is mandatory.  The client must choose an ID that
+      should be unique.  If the requested ID is already in use, a new, random
+      ID will be generated and assigned to the client.
+    */
+    this.messengerInit(options.clientID);
+}
+
+MyClient.prototype = new Messenger();
+
+```
+### Non-overridable methods
+The following methods are inherited from the Messenger class, and should *not* be overridden:
+<dl>
+  <dt>
+    .sendMessage(targetID, message)
+  </dt>
+  <dt>.createChannel(channelName, options)</dt>
+  <dd>
+    Any client can create a channel.  That channel must have a name (<strong>channelName</strong>) that is not
+    currently used by any existing client or channel.  The <strong>options</strong> hash may contain both custom options pertaining to the channel type, and options used by the Messenger framework. The framework pays attention to the following fields in the options hash:
+    <dl>
+      <dt>channelType</dt>
+      <dd>
+	Accepted values are "oneway" and "open".  If set to "oneway", only the creating client may send messages to the channel.  If set to "open", any client may send a conforming message to the channel.
+      </dd>
+    </dl>
+  </dd>
+  <dt>.subscribe(channelName)</dt>
+  <dd>
+    Subscribe for updates from the channel <strong>channelName</strong>.
+  </dd>
+  <dd>
+    Send a message, <strong>message</strong>, to a target with ID <strong>targetID</strong>.  <strong>message</strong> should be a serializable JavaScript object, in a format that the message target/recipient is able to recognize and make use of.
+  </dd>
+  <dt>.changeID(newName)</dt>
+  <dd>A client may attempt to change its ID to a new one of its own choosing, in the event that the client was not given the name it originally requested, or for any other reason.  <strong>newName</strong> is the new name that is being requested.
+  </dd>
+  <dt>.disconnect</dt>
+  <dd>
+    The the developer may want to call this method in the event that an instance of a client is removed from the user interface, as it will clean up some things on the client and server side.
+  </dd>
+</dl>
