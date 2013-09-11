@@ -108,9 +108,13 @@ The following methods are inherited from the Messenger class, and should *not* b
   <dt>.changeID(newName)</dt>
   <dd>A client may attempt to change its ID to a new one of its own choosing, in the event that the client was not given the name it originally requested, or for any other reason.  <strong>newName</strong> is the new name that is being requested.
   </dd>
-  <dt>.disconnect</dt>
+  <dt>.disconnect()</dt>
   <dd>
     The the developer may want to call this method in the event that an instance of a client is removed from the user interface, as it will clean up some things on the client and server side.
+  </dd>
+  <dt>.clientName</dt>
+  <dd>
+    A string member, rather than a method, this is the unique ID of this client.  It is set by the Messenger framework, but is available for use by the client.
   </dd>
 </dl>
 
@@ -131,3 +135,5 @@ The following methods contain default implementations from the Messenger class, 
   </dd>
 </dl>
 
+### Page-level APIs
+At the page level, two "GrumpySet" instances are maintained: `Messenger.allClients` and `Messenger.allChannels`.  In each of these, "all" means all (clients/channels) known to the server that the client connects to.  The list of IDs contained in each of these is available through the `.getKeys()` method, e.g., `Messenger.allChannels.getKeys()`.
