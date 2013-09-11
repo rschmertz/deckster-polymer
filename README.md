@@ -113,3 +113,21 @@ The following methods are inherited from the Messenger class, and should *not* b
     The the developer may want to call this method in the event that an instance of a client is removed from the user interface, as it will clean up some things on the client and server side.
   </dd>
 </dl>
+
+### Overridable methods
+The following methods contain default implementations from the Messenger class, but are available for overriding:
+<dl>
+  <dt>.receiveMessage(message)</dt>
+  <dd>
+    This is the method that the service will call when it has new data for the client.  While a default implementation is provided, it's hard to imagine a useful client that doesn't have its own implementation of this.
+  </dd>
+  <dt>.clientsUpdate()</dt>
+  <dd>
+    This method is called when there has been an update to the list of clients and channels attached to the system.  If your client needs to have an up-to-date list of clients and or channels, it should implement this method.  To get an up-to-date list of Channels, it may call <tt>Messenger.allChannels.getKeys()</tt>.  For an up-to-date list of Clients, call <tt>Messenger.allClients.getKeys()</tt>.  <em>Note: this seems kind of lame.  Maybe this should be reworked to pass clients and channels to the method</em>
+  </dd>
+  <dt>.clientNameRejected(requestedName, newName)</dt>
+  <dd>
+    If the client requests a name which turns out not to be unique, the request will be rejected and a new name randomly generated and assigned.  In that event, this method will be called.  A client may wish to implement this method to, say, prompt the user to apply for a different name.
+  </dd>
+</dl>
+
