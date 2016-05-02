@@ -1,0 +1,25 @@
+{
+  "name": "deckster-polymer",
+  "version": "0.0.0",
+  "homepage": "https://github.com/rschmertz/deckster-polymer",
+  "authors": [
+    "Bob Schmertz <rschmertz@yahoo.com>"
+  ],
+  "description": "Implementation of Deckster using Polymer",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "resolutions": {
+    "polymer": "^0.5",
+    "webcomponentsjs": "^0.6.0"
+  },
+  "dependencies": {
+    "polymer": "0.5.x"
+  }
+}

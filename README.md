@@ -11,7 +11,7 @@ You must install bower globally to use this.
 
 This is a Node.js/Express project, so also do a simple `npm install` in the directory.
 
-Then run `make`
+Then run `bower install`
 
 Then run `node app`.
 

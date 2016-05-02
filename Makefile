@@ -1,3 +1,4 @@
+# Deprecated
 all: build
 
 build: env
